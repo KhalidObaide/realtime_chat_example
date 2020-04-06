@@ -1,0 +1,95 @@
+<html>
+	<head>
+		<title>Socket.IO chat</title>
+		<style>
+			* { margin: 0; padding: 0; box-sizing: border--box; }
+			body { font: 13px Helvetica, Arial; }
+			form { background: #000, padding: 3px; position: fixed; bottom: 0; width: 100%; }
+			form input { border: solid 1px black; padding: 10px; width: 90%; margin-right: .5%; }
+			form button { width: 9%; background: rgb(130, 224, 255); border: nonee; padding: 10px; }
+			#messages { list-style-type: none; margin: 0; padding: 0; }
+			#messages li { padding: 5px 10px; }
+/*			#messages li:nth-child(odd) { background: #eee; }
+*/			.left{
+				text-align: left;
+				background-color: red;
+			}
+			.right{
+				text-align: right;
+				background-color: blue;
+			}
+			.onlineUsersStyle{
+				font-weight: bold;
+			}
+		</style>
+	</head>
+	<body>
+		<div style="text-align: center;">
+			Online Users : <span id="onlineUsers" class="onlineUsersStyle"></span>
+		</div>
+		<ul id="messages"></ul>
+		<form action="">
+			<input id="user_code" value="sdkljljdsflkjsfdkljdsflkdsfj" type="hidden" />
+			<input id="username" value="rashid" type="hidden" />
+			<input id="m" autocomplete="off" placeholder="Type ..." autofocus /><button>Send</button>
+		</form>
+
+		<script src="/socket.io/socket.io.js" type="text/javascript" ></script>
+		<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+		<script>
+			function getCookie(cname) {
+			  var name = cname + "=";
+			  var ca = document.cookie.split(';');
+			  for(var i = 0; i < ca.length; i++) {
+			    var c = ca[i];
+			    while (c.charAt(0) == ' ') {
+			      c = c.substring(1);
+			    }
+			    if (c.indexOf(name) == 0) {
+			      return c.substring(name.length, c.length);
+			    }
+			  }
+			  return "";
+			}
+			$( document ).ready(function() {
+				var socket = io();
+			    console.log( "ready!" );
+	          	socket.emit('username', $('#username').val());
+	          	socket.emit('user_code', $('#user_code').val());
+	          	socket.on('online users', function(users){
+		          console.log('Online Users  : '+ users);
+			      document.getElementById('onlineUsers').innerHTML= users;
+		        });
+			});
+	      $(function () {
+	        var socket = io();
+	        $('form').submit(function(){
+	          socket.emit('chat message', $('#m').val());
+	          socket.emit('username', $('#user_username').val());
+	          socket.emit('user_code', $('#user_code').val());
+	          $('#m').val('');
+	          console.log('message Sent');
+	          return false;
+	        });
+	      	socket.on('username', function(username){
+	        	document.cookie = "username="+username; 
+		        console.log('Username  : '+username );
+		        let user = getCookie("username");
+		        console.log('User  : '+user );
+		    });
+	        socket.on('chat message', function(mssg){
+	          console.log('Message Recived');
+	          let user = document.getElementById('username').value;
+	          if(mssg.user == user){
+	          	$('#messages').append($('<li class="right">').text(mssg.text));
+	          }else{
+	          	$('#messages').append($('<li class="left">').text(mssg.text));
+	          }
+	          
+	          window.scrollTo(0, document.body.scrollHeight);
+	        });
+	        
+	      });
+	    </script>
+	</body>
+</html>
